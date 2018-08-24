@@ -19,7 +19,7 @@ public class blocks extends JFrame {
     private boolean isOver = false; //  Переменная конца работы основного цикла
     private ArrayList<Integer> minYcollection = new ArrayList<>();  //Коллекция минимальных Y
 
-//    Конструктор, тут я разместил настройку окошка рисования, спешл фо Java конструкция
+//    Конструктор, тут я разместил настройку окошка рисования, конструкция спешл фо Java
     private blocks(String s) {
         super(s);
         setLayout(null);
@@ -52,43 +52,33 @@ public class blocks extends JFrame {
     public void paint(Graphics myPicture) {
         int x1, x2, index = -1;
         initIsFilled();
-        System.out.println(denX + " and " + denY);
         myPicture.setColor(Color.WHITE);
         myPicture.fillRect(0, 0, xMax, yMax);
         rects = sort(rects);        // TODO добавить другие варианты сортировки, например по группам с общим Y
         while (!isOver&& rects[0].length > 0){
-        //for (int z = 0; z < rects[0].length; z++) {
-            System.out.println("rects " + rects[0].length + " ,y - " + rects[1].length);
             x1 = findX(0, yMin, false, false); // minX=0, yMin, isForFindY=false, isInvert=false
-            System.out.println(x1);
             x2 = findX(x1, yMin, false, true);
-            System.out.println(x2);
             if(rects[0].length != 0) {  // Есть ли что в массиве?
                 if (x2 - x1 >= rects[0][rects[0].length - 1] &&
-                        yMax >= yMin + rects[1][rects[1].length - 1]) { // Подходит ли самая маленькая в найденный участок
-                    System.out.println("First if");
+                   yMax >= yMin + rects[1][rects[1].length - 1]) { //Подходит ли самая маленькая в найденный участок
                     for (int i = 0; i < rects[0].length; i++){
                         if (x2 - x1 >= rects[0][i]) {   // Подходит ли очередная фигура по Х
                             index = i; //   Запоминаем номер
                         } else if (x2 - x1 >= rects[1][i]) { // Если по Х болт, пробуем по Y
                             rotate(i);  // Поворот фигуры
                             index = i;
-                            System.out.println("rotate figure " + index);
                         }
                         if (index != -1 && compareY(yMin, index)){ // Влезает ли по Y
                             break;
                         } else index = -1;
-                        System.out.println("figure cycle tick " + index);
                     }
                     if (index != -1) {
-                        System.out.println("index part of main cycle, figure index is " + index + " min Y is " + yMin);
                         myPicture.setColor(Color.BLACK);
                         myPicture.fillRect(x1, yMin, rects[0][index], rects[1][index]);
                         myPicture.setColor(Color.RED);
                         myPicture.drawRect(x1, yMin, rects[0][index], rects[1][index]);
                         fillBoolField(x1, yMin, rects[0][index], rects[1][index]);  // заполнение булева поля
                         minYcollection.add(rects[1][index] + yMin);                 // добавление минимального Y
-                        System.out.println(minYcollection.toString());
                         removeIndex(index);                                         // удаляем отрисованную фигуру
                         index = -1;                                                 // это для очередного прохода
                     }
@@ -96,9 +86,7 @@ public class blocks extends JFrame {
                     fillBoolField(x1, yMin, x2 - x1, denY);
                 }
             }
-            System.out.println("what was that?!");
         }
-        System.out.println("OVER!");
     }
 
 //    Удаление фигуры по индексу из массива
@@ -167,17 +155,14 @@ public class blocks extends JFrame {
         while (i < xMax + denX && !isOver) {
             if (isFilled[i][minY] == isInvert) { // isInvert = true ищет занятые Х вместо свободных
                 x = i;
-                System.out.println("x equals " + x);
                 yMin = minY;
                 break;
             }
             i = i + denX;
         }
-        System.out.println("after cycle x equals " + x);
         if (x == -1 && !isForFindY &&!isOver) { // isForFindY - для исключения рекурсии при вызове из findMinY
             x = findX(0, findMinY(minY), false, isInvert);
         }
-        System.out.println("return x = " + x);
         return x;
     }
 
@@ -186,12 +171,10 @@ public class blocks extends JFrame {
         int y = 0;
         if (!minYcollection.isEmpty()) { //   Проверяем, есть ли что-то в коллекции
             minYcollection.sort(Comparator.naturalOrder());        //   Сортировка по возрастанию
-            System.out.println(minYcollection.toString());
             y = minYcollection.get(0);  //  Берем самый маленький
             minYcollection.remove(0);   //  Удаляем, чтобы не повторяться
         } else {                              // Если в массиве мышь откинулась, включаем ручной поиск через булево поле
             int i = minY;
-            System.out.println("Y started with " + i);
             while(i < yMax){
                 i = i + denY;
                 if (findX(0, i, true, false) != -1) {
@@ -202,10 +185,8 @@ public class blocks extends JFrame {
                     isOver = true;
                     break;
                 }
-                System.out.println(y + " = y, and i = " + i);
             }
         }
-        System.out.println("Now Y is " + y);
         if (y == yMax) isOver = true; // Конец работы основного цикла, если лист закончился
         yMin = y;
         return y;
@@ -213,7 +194,6 @@ public class blocks extends JFrame {
 
 //    Заполнение булева поля, try - catch это чисто жаба конструкция для исключений
     private void fillBoolField (int startX, int startY, int lengthX, int lengthY){
-        System.out.println("fillBool = " + startX + " " + startY + " " + lengthX + " " + lengthY);
             for (int i = startX; i < startX + lengthX; i++) {
                 for (int j = startY; j < startY + lengthY; j++) {
                     isFilled[i][j] = true;
@@ -253,14 +233,6 @@ public class blocks extends JFrame {
                 }
             }
         }
-        for (int j = 0; j < rect[0].length; j++) {
-            System.out.println(rect[0][j] + " " + rect[1][j]);
-        }
-        return rect;
-    }
-
-    private int[][] sortSame(int[][] rect) {
-        //TODO сортировка по одинаковой координате
         return rect;
     }
 
